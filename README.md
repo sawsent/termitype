@@ -64,8 +64,6 @@ Termitype is designed around a few guiding principles:
 Contributions are welcome!  
 Whether it’s adding adapters, improving the typing logic, or refining the UX, all help is appreciated.  
 
-For setup instructions and development details, see [CONTRIBUTING.md](CONTRIBUTING.md) (coming soon).
-
 ---
 
 ## ⚖️ License

@@ -2,7 +2,7 @@ from termitype.views.base import View
 from termitype.adapters.base import Adapter
 from typing import Optional, override
 
-class DummyView(View):
+class RunView(View):
 
     def __init__(self, adapter: Adapter, menu: View):
         self.adapter: Adapter = adapter
@@ -10,16 +10,23 @@ class DummyView(View):
         self.menu_view: View = menu
         self.__next_view: Optional[View] = self
 
+        self.ESCAPE: str = "\x1b"
+
     @override
     def render(self):
-        self.adapter.render(f"Last key pressed: {self.last_key_press}, [q] to go back to menu.")
+        self.adapter.render(
+f"""
+THIS IS THE RUN VIEW
+Last key pressed: {repr(self.last_key_press)}, [Esc] to go back to menu.
+"""
+        )
 
     @override
     def handle_input(self, key: str):
         self.last_key_press: str = key
 
         match key:
-            case "q": self.__next_view = self.return_to()
+            case self.ESCAPE: self.__next_view = self.return_to()
             case _: self.__next_view = self
 
     @override

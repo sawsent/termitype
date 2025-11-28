@@ -7,6 +7,13 @@ class Adapter(ABC):
     """
 
     @abstractmethod
+    def startup(self) -> None:
+        """
+        Startup for the adapter (hide cursor, ...)
+        """
+        pass
+
+    @abstractmethod
     def render(self, text: str):
         """
         Render text to the terminal.

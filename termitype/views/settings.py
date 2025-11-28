@@ -17,7 +17,7 @@ class SettingsView(View):
         self.last_key_press = key
         match key:
             case "q": self.__next_view = self.return_to()
-            case _: pass
+            case _: self.__next_view = self
 
     def next_view(self) -> Optional[View]:
         return self.__next_view

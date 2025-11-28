@@ -19,13 +19,21 @@ class MenuView(View):
 
     def render(self):
         text = "\n".join(f"[{k}] {v}" for k, v in self.views_descriptions.items())
-        self.adapter.render(text)
+        self.adapter.render(
+f"""
+THIS IS THE MENU VIEW
+{text}
+"""
+        )
 
     def handle_input(self, key):
         self.last_key_press = key
 
     def next_view(self) -> Optional[View]:
-        return self.views.get(self.last_key_press)
+        if self.last_key_press in self.views:
+            return self.views.get(self.last_key_press)
+        else:
+            return self
 
     def return_to(self) -> Optional[View]:
         return None

@@ -1,23 +1,33 @@
 from abc import ABC, abstractmethod
 from typing import Self, Optional
+from termitype.models.inputevent import InputEvent
+from termitype.models.presentation.presentation import Presentation
+from termitype.models.settings import DisplaySettings
 
-class View(ABC):
+class Screen(ABC):
     """
     Abstract base class for all Views in Termitype.
     Each view must implement rendering, input handling, and next state logic.
     """
+    def __init__(self, settings: DisplaySettings):
+        self.settings = settings
 
     @abstractmethod
-    def render(self):
+    def restart(self) -> Self:
         """
-        Draw the view to the terminal via the provided adapter.
-        
-        :param adapter: The terminal adapter (Linux/mac/PowerShell/etc.)
+        Clears internal state.
         """
         pass
 
     @abstractmethod
-    def handle_input(self, key):
+    def render(self) -> Presentation:
+        """
+        Create the presentation with the given size.
+        """
+        pass
+
+    @abstractmethod
+    def handle_input(self, input_event: InputEvent):
         """
         Handle a single keypress or command.
 
@@ -26,7 +36,7 @@ class View(ABC):
         pass
 
     @abstractmethod
-    def next_view(self) -> Optional[Self]:
+    def next_screen(self) -> Optional[Self]:
         """
         Determine what the next view/state should be.
 

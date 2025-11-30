@@ -1,19 +1,25 @@
 from termitype.app.app import App
-from termitype.app.config import AppConfig
 from termitype.adapters.macos import MacAdapter
-from termitype.views.run import RunView
-from termitype.views.menu import MenuView
-from termitype.views.settings import SettingsView
+from termitype.screens.sandbox import SandboxScreen
+from termitype.screens.typingrun import TypingRunScreen
+from termitype.screens.menu import MenuScreen
+from termitype.screens.settings import SettingsScreen
+from termitype.storage.settings import default_settings
+from termitype.models.settings import DisplaySettings
+from pathlib import Path
 
 def main():
     adapter = MacAdapter()
-    menu = MenuView(adapter)
-    menu.register_view(id="r", view=RunView(adapter, menu), description="Run test!")
-    menu.register_view(id="s", view=SettingsView(adapter, menu), description="Settings")
-    menu.register_view(id="q", view=None, description="Quit")
 
-    config = AppConfig(adapter, menu)
-    app = App(config)
+    settings = default_settings()
+    display_settings = DisplaySettings.from_settings(settings)
+
+    menu = MenuScreen(display_settings)
+    menu.register_screen(id="r", view=TypingRunScreen(adapter, menu, display_settings), description="Run test!")
+    menu.register_screen(id="s", view=SettingsScreen(adapter, menu, display_settings), description="Settings")
+    menu.register_screen(id="b", view=SandboxScreen(adapter, menu, display_settings), description="Sandbox")
+
+    app = App(adapter, menu)
 
     try:
         adapter.startup()

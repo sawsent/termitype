@@ -1,20 +1,21 @@
 from typing import Optional
-from termitype.app.config import AppConfig
-from termitype.views.base import View
+from termitype.screens.base import Screen
+from termitype.adapters.base import Adapter
 
 class App:
 
-    def __init__(self, config: AppConfig):
-        self.adapter = config.adapter
-        self.view: Optional[View] = config.starting_view
-        self.previous_view: Optional[View] = None
+    def __init__(self, adapter: Adapter, starting_view: Screen):
+        self.adapter = adapter
+        self.screen: Optional[Screen] = starting_view
+
 
     def run(self):
-        while self.view is not None:
-            self.view.render()
+        while self.screen is not None:
+            presentation = self.screen.render()
+            self.adapter.render(presentation)
 
-            key = self.adapter.get_key()
-            self.view.handle_input(key)
+            input_event = self.adapter.get_input_event()
+            self.screen.handle_input(input_event)
 
-            self.view = self.view.next_view()
+            self.screen = self.screen.next_screen()
 

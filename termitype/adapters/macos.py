@@ -1,10 +1,12 @@
 from termitype.adapters.base import Adapter
-from typing import List, override
-
+from typing import List, override, Tuple
 import sys
 import os
 import termios
 import tty
+from termitype.models.inputevent import InputEvent
+from termitype.models.presentation.cursor import Cursor, CursorStyle
+from termitype.models.presentation.presentation import Presentation
 
 class MacAdapter(Adapter):
 
@@ -12,26 +14,34 @@ class MacAdapter(Adapter):
         pass
 
     @override
+    def get_terminal_size(self) -> Tuple[int, int]:
+        return os.get_terminal_size()
+
+    @override
     def startup(self):
         self.hide_cursor()
 
     @override
-    def render(self, text: str):
-        (terminal_lines, terminal_columns) = os.get_terminal_size()
+    def render(self, presentation: Presentation):
+        (terminal_width, terminal_height) = os.get_terminal_size()
 
         self.clear()
 
-        lines = text.split("\n")
+        lines = presentation.lines
         x_size = len(max(lines, key=len))
         y_size = len(lines)
 
-        y_indent = round((terminal_columns / 2) - (y_size / 2))
-        x_indent = round((terminal_lines / 2) - (x_size / 2))
+        y_indent = round((terminal_height / 2) - (y_size / 2))
+        x_indent = round((terminal_width / 2) - (x_size / 2))
         
         self.indent_y(y_indent)
         sys.stdout.write(self.indent_x(lines, x_indent))
         sys.stdout.flush()
+        self.draw_cursor(presentation.cursor)
 
+    def draw_cursor(self, cursor: Cursor):
+        sys.stdout.write(f"\x1b[{cursor.line};{cursor.col}H{CursorStyle.get_repr(cursor.style)}")
+        sys.stdout.flush()
 
     def indent_x(self, lines: List[str], indentation: int) -> str:
         return "\n".join(map(lambda line: f"{" " * indentation}{line}", lines))
@@ -40,7 +50,7 @@ class MacAdapter(Adapter):
         sys.stdout.write("\n" * indentation)
 
     @override
-    def get_key(self) -> str:
+    def get_input_event(self) -> InputEvent:
         """
         Reads a single keypress using raw terminal mode.
         Blocks until a key is pressed.
@@ -54,7 +64,18 @@ class MacAdapter(Adapter):
         finally:
             termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
 
-        return char
+        match char:
+            case "\x1b":        return InputEvent.ESCAPE()
+            case "\t":          return InputEvent.TAB()
+            case "\r":          return InputEvent.ENTER()
+            case "\b" | "\x7f": return InputEvent.BACKSPACE()
+            
+            case _ if len(repr(char)) == 3:
+                return InputEvent.CHAR(char)
+
+        return InputEvent.EMPTY()
+
+
 
     @override
     def clear(self) -> None:
@@ -63,8 +84,8 @@ class MacAdapter(Adapter):
 
     @override
     def finalize(self):
-        self.show_cursor()
         self.clear()
+        self.show_cursor()
 
     def show_cursor(self):
         sys.stdout.write("\033[?25h")

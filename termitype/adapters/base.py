@@ -1,10 +1,21 @@
 from abc import ABC, abstractmethod
+from typing import Tuple
+
+from termitype.models.inputevent import InputEvent
+from termitype.models.presentation.presentation import Presentation
 
 class Adapter(ABC):
     """
     Abstract base class for terminal adapters.
     Handles input and output for different platforms.
     """
+
+    @abstractmethod
+    def get_terminal_size(self) -> Tuple[int, int]:
+        """
+        Gets the size of the terminal (width, height)
+        """
+        pass
 
     @abstractmethod
     def startup(self) -> None:
@@ -14,7 +25,7 @@ class Adapter(ABC):
         pass
 
     @abstractmethod
-    def render(self, text: str):
+    def render(self, presentation: Presentation):
         """
         Render text to the terminal.
         Could handle color, formatting, etc.
@@ -24,7 +35,7 @@ class Adapter(ABC):
         pass
 
     @abstractmethod
-    def get_key(self) -> str:
+    def get_input_event(self) -> InputEvent:
         """
         Read a single keypress from the user.
 

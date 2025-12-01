@@ -3,8 +3,8 @@ from dataclasses import dataclass
 
 @dataclass
 class Settings():
-    width: int = 100
-    height: int = 20
+    width: int = 150
+    height: int = 40
 
 @dataclass(frozen=True)
 class DisplaySettings():

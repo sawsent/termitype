@@ -1,6 +1,6 @@
 from termitype.adapters.base import Adapter
 from termitype.models.inputevent import InputEvent, InputEventType as IET
-from termitype.models.presentation.presentation import Presentation
+from termitype.models.presentation.presentation import Presentation, Line, Slide
 from termitype.models.settings import DisplaySettings
 from termitype.screens.base import Screen
 from typing import Optional, override, Self
@@ -21,7 +21,7 @@ class SettingsScreen(Screen):
         return self
 
     def render(self) -> Presentation:
-        return Presentation(lines=["This is the settings view [Esc] to go back"])
+        return Presentation(slide=Slide.CENTERED_XY(["This is the settings view [Esc] to go back"]), width=self.settings.width, height=self.settings.height)
 
     def handle_input(self, input_event: InputEvent):
         match input_event.type:

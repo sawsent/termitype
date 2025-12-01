@@ -1,5 +1,5 @@
 from termitype.models.inputevent import InputEvent, InputEventType as IET
-from termitype.models.presentation.presentation import Presentation
+from termitype.models.presentation.presentation import Bar, Presentation, Line, Slide
 from termitype.models.settings import DisplaySettings
 from termitype.screens.base import Screen
 from termitype.adapters.base import Adapter
@@ -24,11 +24,14 @@ class SandboxScreen(Screen):
 
     @override
     def render(self) -> Presentation:
-        text_lines = self.chunk_words(self.text, 50)
+        text_lines = self.chunk_words(self.text, self.settings.width)
+        top = Bar(["SANDBOX: TYPE AWAY", "[ESC] menu", "[TAB] clear text"], self.settings.width)
+        slide = Slide.CENTERED_XY(text_lines)
         return Presentation(
-            lines=[
-                "SANDBOX: TYPE AWAY ([ESC] to go back to menu, [TAB] to clear text)"
-            ] + text_lines
+            width=self.settings.width,
+            height=self.settings.height,
+            slide=slide,
+            top_bar=top
         )
 
     def chunk_words(self, text: str, size: int) -> List[str]:
@@ -46,14 +49,7 @@ class SandboxScreen(Screen):
                 remaining_text = " ".join(remaining_text.split(" ")[1:]).strip()
             lines += [current_line]
 
-        cursor = "|"
-        if text.endswith(" "):
-            cursor = " |"
-
-        last_line = lines[-1] + cursor
-        lines.pop()
-
-        return lines + [last_line]
+        return lines
 
 
 

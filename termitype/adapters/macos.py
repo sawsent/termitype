@@ -27,15 +27,11 @@ class MacAdapter(Adapter):
 
         self.clear()
 
-        lines = presentation.lines
-        x_size = len(max(lines, key=len))
-        y_size = len(lines)
-
-        y_indent = round((terminal_height / 2) - (y_size / 2))
-        x_indent = round((terminal_width / 2) - (x_size / 2))
+        y_indent = round(((terminal_height - presentation.height) / 2))
+        x_indent = round(((terminal_width - presentation.width) / 2))
         
         self.indent_y(y_indent)
-        sys.stdout.write(self.indent_x(lines, x_indent))
+        sys.stdout.write(self.indent_x(presentation.as_text(), x_indent))
         sys.stdout.flush()
         self.draw_cursor(presentation.cursor)
 
@@ -43,8 +39,8 @@ class MacAdapter(Adapter):
         sys.stdout.write(f"\x1b[{cursor.line};{cursor.col}H{CursorStyle.get_repr(cursor.style)}")
         sys.stdout.flush()
 
-    def indent_x(self, lines: List[str], indentation: int) -> str:
-        return "\n".join(map(lambda line: f"{" " * indentation}{line}", lines))
+    def indent_x(self, text: str, indentation: int) -> str:
+        return "\n".join([ f"{" " * indentation}{line}" for line in text.split("\n") ])
 
     def indent_y(self, indentation: int) -> None:
         sys.stdout.write("\n" * indentation)

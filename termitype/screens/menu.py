@@ -1,5 +1,5 @@
 from termitype.models.inputevent import InputEvent, InputEventType as IET
-from termitype.models.presentation.presentation import Presentation
+from termitype.models.presentation.presentation import Presentation, Line, Slide
 from termitype.screens.base import Screen
 from typing import Optional, Dict, Self, override
 from termitype.models.settings import DisplaySettings
@@ -26,7 +26,8 @@ class MenuScreen(Screen):
             "[ESC] Quit"
         ]
         lines = [f"[{k}] {v}" for k, v in self.screen_descriptions.items()]
-        return Presentation(lines=welcome + lines)
+        slide = Slide.CENTERED_XY(welcome + lines)
+        return Presentation(slide=slide, width=self.settings.width, height=self.settings.height)
 
     @override
     def handle_input(self, input_event: InputEvent):

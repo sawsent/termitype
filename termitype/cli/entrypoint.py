@@ -21,7 +21,7 @@ def main():
 
     engine = TypingEngine(words())
 
-    menu.register_screen(id="r", view=TypingRunScreen(adapter, menu, engine, display_settings), description="Run test!")
+    menu.register_screen(id="r", view=TypingRunScreen(adapter, menu, engine, settings), description="Run test!")
     menu.register_screen(id="s", view=SettingsScreen(adapter, menu, display_settings), description="Settings")
     menu.register_screen(id="b", view=SandboxScreen(adapter, menu, display_settings), description="Sandbox")
 

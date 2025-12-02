@@ -2,6 +2,8 @@ from enum import Enum
 import time
 from typing import List, Optional, Self
 
+from termitype.models.engine.runreport import RunReport
+
 
 class SegmentType(Enum):
     CORRECT = 1
@@ -45,6 +47,25 @@ class Run:
     def start(self) -> None:
         self.start_time_ns = time.time_ns()
 
+    def should_auto_finish(self) -> bool:
+        """
+        A run will finish once:
+        1. The length of words typed is the same as the length of words expected
+        2. The last word's length is the same as the current word
+        3. The last character is the same as the current word's last character
+        """
+        wl = self.word_list
+        cw = self.current_word
+        return len(wl) == len(self.words_typed) + 1 and len(wl[-1]) == len(cw) and wl[-1][-1] == cw[-1]
+
+    def auto_finish(self) -> None:
+        self.words_typed.append(self.current_word)
+        self.current_word = ""
+        self.finish()
+
+    def should_finish(self) -> bool:
+        return len(self.word_list) == len(self.words_typed)
+
     def finish(self) -> None:
         self.end_time_ns = time.time_ns()
 
@@ -83,8 +104,13 @@ class Run:
     def finished(self) -> bool:
         return self.start_time_ns is not None and self.end_time_ns is not None
 
-    def get_segments(self) -> List[List[RunSegment]]:
-        return self.__get_segments()
+    def get_segments(self) -> List[RunSegment]:
+        segments_by_word = self.__get_segments()
+        for idx, word in enumerate(segments_by_word):
+            if idx == len(segments_by_word) - 1:
+                break
+            word.append(RunSegment.SPACE())
+        return [ x for group in segments_by_word for x in group ]
 
     def __get_segments(self) -> List[List[RunSegment]]:
         typed_words: List[List[RunSegment]] = []
@@ -94,8 +120,11 @@ class Run:
         
         for (typed, expected) in zip(self.words_typed, self.word_list):
             typed_words.append(self.get_segments_for_word(typed, expected))
-            
-        last_word_segments = self.get_segments_for_last_word(last_word, self.word_list[last_word_idx])
+        
+        if len(self.words_typed) < len(self.word_list):
+            last_word_segments = self.get_segments_for_last_word(last_word, self.word_list[last_word_idx])
+        else:
+            last_word_segments = []
         typed_words.append(last_word_segments)
 
         untyped_words = [ [RunSegment.TO_BE_TYPED(word)] for word in self.word_list[last_word_idx + 1:] ]
@@ -144,5 +173,23 @@ class Run:
 
         merged.append(RunSegment(current_type, current_text))
         return merged
+
+    def get_run_report(self) -> Optional[RunReport]:
+        if self.finished and self.start_time_ns is not None and self.end_time_ns is not None:
+            time=self.end_time_ns - self.start_time_ns
+            time_seconds = time / 1000000000
+            segments = self.get_segments()
+            total_chars = sum([ len(word) for word in self.word_list ])
+            correct_chars = sum([len(seg.text.strip()) for seg in segments if seg.segment_type == SegmentType.CORRECT])
+            accuracy = round((correct_chars / total_chars) * 100)
+            wpm = round((total_chars / 5) / (time_seconds / 60))
+            return RunReport(
+                wpm=wpm,
+                time_ns=time,
+                word_amount=len(self.word_list),
+                expected_text=" ".join(self.word_list),
+                typed_text="".join([seg.text for seg in segments]),
+                accuracy=accuracy
+            )
 
 

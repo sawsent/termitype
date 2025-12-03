@@ -3,9 +3,10 @@ from dataclasses import dataclass
 
 @dataclass
 class Settings():
-    width: int = 150
-    height: int = 40
-    test_word_count: int = 10
+    width: int = 100
+    height: int = 30
+    test_word_count: int = 50
+    test_text_max_width: int = 60
 
 @dataclass(frozen=True)
 class DisplaySettings():
@@ -22,9 +23,12 @@ class DisplaySettings():
 @dataclass
 class TypingRunSettings():
     words: int
+    test_text_max_width: int
 
     @classmethod
     def from_settings(cls, settings: Settings) -> Self:
         return cls(
-            words = settings.test_word_count
+            words = settings.test_word_count,
+            test_text_max_width = settings.test_text_max_width
         )
+

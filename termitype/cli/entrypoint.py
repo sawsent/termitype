@@ -20,12 +20,13 @@ def main():
     menu = MenuScreen(display_settings)
 
     engine = TypingEngine(words())
+    typing_run_screen = TypingRunScreen(adapter, menu, engine, settings)
 
-    menu.register_screen(id="r", view=TypingRunScreen(adapter, menu, engine, settings), description="Run test!")
-    menu.register_screen(id="s", view=SettingsScreen(adapter, menu, display_settings), description="Settings")
+    menu.register_screen(id="r", view=typing_run_screen, description="Back to test")
+    menu.register_screen(id="s", view=SettingsScreen(adapter, menu, typing_run_screen, display_settings), description="Settings")
     menu.register_screen(id="b", view=SandboxScreen(adapter, menu, display_settings), description="Sandbox")
 
-    app = App(adapter, menu)
+    app = App(adapter, typing_run_screen)
 
     try:
         adapter.startup()

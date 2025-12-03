@@ -1,15 +1,17 @@
 from termitype.core.engine import TypingEngine
 from termitype.models.engine.run import Run, RunSegment, SegmentType
 from termitype.models.inputevent import InputEvent, InputEventType as IET
-from termitype.models.presentation.presentation import Bar, Presentation, Line, Slide
+from termitype.models.presentation.presentation import Bar, BarStyle, Presentation, Line, Slide
 from termitype.models.settings import DisplaySettings, Settings, TypingRunSettings
 from termitype.screens.base import Screen
 from termitype.adapters.base import Adapter
 from typing import Optional, override, List, Self
 
 from termitype.utils.color import Color, color, visible_len
+from termitype.utils.topbar import TOP_BAR_MENU
 
 class TypingRunScreen(Screen):
+    BOT_BAR = Bar.SINGLE(["[ESC] settings", "[TAB] restart" ], style=BarStyle.ALIGNED_RIGHT(padding_right=2, gap=5))
 
     def __init__(self, adapter: Adapter, menu: Screen, typing_engine: TypingEngine, settings: Settings):
         super().__init__(DisplaySettings.from_settings(settings))
@@ -17,7 +19,6 @@ class TypingRunScreen(Screen):
         self.adapter: Adapter = adapter
         self.__return_to: Screen = menu
         self.engine = typing_engine
-        self.TOP_BAR = Bar(elements=["[ESC] Return to menu", "[TAB] restart run" ], width=round(self.settings.width))
         self.restart()
 
     @override
@@ -28,15 +29,12 @@ class TypingRunScreen(Screen):
         self.engine.new_run(self.run_settings)
         return self
 
-    def get_presentation(self, slide: Slide, top_bar: Optional[Bar] = None, width: Optional[int] = None, height: Optional[int] = None) -> Presentation:
-        _top_bar = top_bar if top_bar is not None else self.TOP_BAR
-        _width = width if width is not None else self.settings.width
-        _height = height if height is not None else self.settings.height
-
+    def get_presentation(self, slide: Slide) -> Presentation:
         return Presentation(
-            width=_width,
-            height=_height,
-            top_bar=_top_bar,
+            width=self.settings.width,
+            height=self.settings.height,
+            top_bar=TOP_BAR_MENU,
+            bottom_bar=self.BOT_BAR,
             slide=slide
         )
 
@@ -54,17 +52,15 @@ class TypingRunScreen(Screen):
 
         return self.get_presentation(Slide.CENTERED_XY(lines=["something went wrong"]))
 
-
-
     def render_in_play_run(self, run: Run) -> Presentation:
-        text_lines = self.chunk_words(self.colored_run_segments(run.get_segments()), self.settings.width)
+        text_lines = self.chunk_words(self.colored_run_segments(run.get_segments()), self.run_settings.test_text_max_width)
 
         return self.get_presentation(
             Slide.CENTERED_XY(lines=[""] + text_lines)
         )
 
     def render_unstarted_run(self, run: Run) -> Presentation:
-        text_lines = self.chunk_words(self.colored_run_segments(run.get_segments()), self.settings.width)
+        text_lines = self.chunk_words(self.colored_run_segments(run.get_segments()), self.run_settings.test_text_max_width)
 
         return self.get_presentation(
             Slide.CENTERED_XY(lines=["Type any letter to start!"] + text_lines)

@@ -1,9 +1,11 @@
 from termitype.models.inputevent import InputEvent, InputEventType as IET
-from termitype.models.presentation.presentation import Bar, Presentation, Line, Slide
+from termitype.models.presentation.presentation import Bar, BarStyle, Presentation, Line, Slide
 from termitype.models.settings import DisplaySettings
 from termitype.screens.base import Screen
 from termitype.adapters.base import Adapter
 from typing import Optional, override, List, Self
+
+from termitype.utils.topbar import TOP_BAR_MENU
 
 class SandboxScreen(Screen):
 
@@ -25,13 +27,14 @@ class SandboxScreen(Screen):
     @override
     def render(self) -> Presentation:
         text_lines = self.chunk_words(self.text, self.settings.width)
-        top = Bar(["SANDBOX: TYPE AWAY", "[ESC] menu", "[TAB] clear text"], self.settings.width)
+        bot = Bar.SINGLE(["[ESC] menu", "[TAB] clear text"], style=BarStyle.ALIGNED_RIGHT(gap=5, padding_right=2), show_outline=True)
         slide = Slide.CENTERED_XY(text_lines)
         return Presentation(
             width=self.settings.width,
             height=self.settings.height,
             slide=slide,
-            top_bar=top
+            top_bar=TOP_BAR_MENU,
+            bottom_bar=bot
         )
 
     def chunk_words(self, text: str, size: int) -> List[str]:

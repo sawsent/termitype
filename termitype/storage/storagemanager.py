@@ -16,11 +16,9 @@ class StorageManager:
                 display_outline=settings_dict["display"]["outline"],
                 test_word_count = settings_dict["typing"]["word_count"],
                 test_text_max_width = settings_dict["typing"]["line_max_width"],
-                test_style=settings_dict["typing"]["display_style"]["type"],
-                ahead=settings_dict["typing"]["display_style"]["ahead"],
-                behind=settings_dict["typing"]["display_style"]["behind"],
                 language=settings_dict["typing"]["language"],
                 show_exit_message=settings_dict["general"]["show_exit_message"],
+                show_logo=settings_dict["general"]["show_logo"],
             )
 
     def save_settings(self, settings: Settings) -> None:
@@ -35,14 +33,10 @@ class StorageManager:
                     "language": settings.language,
                     "line_max_width": settings.test_text_max_width,
                     "word_count":  settings.test_word_count,
-                    "display_style": {
-                        "type": settings.test_style,
-                        "ahead": settings.ahead,
-                        "behind": settings.behind
-                    }
                 },
                 "general": {
-                    "show_exit_message": settings.show_exit_message
+                    "show_exit_message": settings.show_exit_message,
+                    "show_logo": settings.show_logo
                 }
             }
             json.dump(settings_dict, f, indent=2)

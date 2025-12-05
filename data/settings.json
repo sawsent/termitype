@@ -9,12 +9,13 @@
     "line_max_width": 90,
     "word_count": 100,
     "display_style": {
-      "type": "BLOCK",
+      "type": "block",
       "ahead": 2,
       "behind": 2
     }
   },
   "general": {
-    "show_exit_message": true
+    "show_exit_message": true,
+    "show_logo": true
   }
 }

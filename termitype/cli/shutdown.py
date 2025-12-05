@@ -10,5 +10,4 @@ def show_exit_message() -> None:
     print()
     print(LOGO)
     print()
-    print("Thanks for using termitype, consider starring the repo on github! :D")
-    print(REPO)
+    print(f"Thanks for using termitype, consider starring the repo on github here: {REPO}")

@@ -1,11 +1,11 @@
-from typing import Self
+from typing import Optional, Self
 from enum import Enum
 from typing import Dict, List
 from termitype.models.presentation.cursor import Cursor
 from termitype.models.presentation.highlight import Highlight
 from math import floor, ceil
 
-from termitype.utils.color import visible_len as v_len
+from termitype.utils.color import Bg, Color, color, visible_len as v_len
 
 def outline(lines: List[str]) -> List[str]:
     width = v_len(lines[0]) if lines else 0
@@ -49,27 +49,35 @@ class LineStyle:
 class Line:
     @classmethod
     def EMPTY(cls) -> Self:
-        return cls([""], LineStyle.CENTERED())
+        return cls([""], LineStyle.CENTERED(), None, None)
 
     @classmethod
     def CENTERED(cls, text: str) -> Self:
-        return cls([text], LineStyle.CENTERED())
+        return cls([text], LineStyle.CENTERED(), None, None)
+
+    @classmethod
+    def CENTER(cls, elements: List[str], padding: int = 0, color: Optional[Color] = None, bg: Optional[Bg] = None, outlined: bool = False) -> Self:
+        return cls(elements, LineStyle.CENTERED(padding=padding, outlined=outlined), color, bg)
+
+    @classmethod
+    def ALIGNED_LEFT(cls, elements: List[str], padding_left: int, gap: int, outlined: bool = False, color: Color | None = None, bg: Bg | None = None) -> Self:
+        return cls(elements, LineStyle.ALIGNED_LEFT(padding_left, gap, outlined), color, bg)
 
     @classmethod
     def CENTERED_LINES(cls, lines: List[str]) -> List[Self]:
         return [cls.CENTERED(line) for line in lines]
 
-    def __init__(self, elements: List[str], style: LineStyle):
+    def __init__(self, elements: List[str], style: LineStyle, color: Optional[Color], bg: Optional[Bg]):
         self.elements: List[str] = elements
         self.style: LineStyle = style
+        self.bg: Optional[Bg] = bg
+        self.color: Optional[Color] = color
 
-    @property
-    def text(self) -> str:
-        return " ".join(self.elements)
-    
     def as_text(self, total_width: int) -> List[str]:
-        without_outline = self.without_outline_text(total_width)
-        return outline([without_outline]) if self.style.outlined else [without_outline]
+        if self.style.outlined:
+            return outline([self.without_outline_text(total_width - 2)])
+        else:
+            return [self.without_outline_text(total_width)]
 
     def without_outline_text(self, total_width: int) -> str:
         if len(self.elements) == 0:
@@ -81,15 +89,15 @@ class Line:
                     return filler(floor(half_filler)) + self.elements[0] + filler(ceil(half_filler))
                 empty_space = total_width - sum([v_len(element) for element in self.elements]) - self.style.padding_right - self.style.padding_left
                 space_between = filler(floor(empty_space / (len(self.elements) - 1)))
-                without_padding = space_between.join(self.elements)
+                without_padding = color(space_between.join(self.elements), self.color, self.bg)
                 return filler(self.style.padding_left) + without_padding + filler(total_width - self.style.padding_left - v_len(without_padding))
             case LineStyle.ALIGN_LEFT:
                 space_between = " " * self.style.gap
-                without_padding = space_between.join(self.elements)
+                without_padding = color(space_between.join(self.elements), self.color, self.bg)
                 return filler(self.style.padding_left) + without_padding + filler(total_width - self.style.padding_left - v_len(without_padding))
             case LineStyle.ALIGN_RIGHT:
                 space_between = " " * self.style.gap
-                without_padding = space_between.join(self.elements)
+                without_padding = color(space_between.join(self.elements), self.color, self.bg)
                 return filler(total_width - self.style.padding_right - v_len(without_padding)) + without_padding + filler(self.style.padding_right)
 
         return filler(total_width)
@@ -155,17 +163,26 @@ class SlideStyle(Enum):
 class Slide:
 
     @classmethod
-    def CENTERED_XY(cls, lines: List[str]) -> Self:
-        return cls(Line.CENTERED_LINES(lines), SlideStyle.CENTERED_Y, outlined=False)
+    def CENTERED_XY(cls, lines: List[str], outlined: bool = False) -> Self:
+        return cls(Line.CENTERED_LINES(lines), SlideStyle.CENTERED_Y, outlined=outlined)
 
     @classmethod
-    def CENTERED(cls, lines: List[Line]) -> Self:
-        return cls(lines, SlideStyle.CENTERED_Y, outlined=False)
+    def CENTERED(cls, lines: List[Line], outlined: bool = False) -> Self:
+        return cls(lines, SlideStyle.CENTERED_Y, outlined=outlined)
 
-    def __init__(self, lines: List[Line], style: SlideStyle, outlined: bool):
+    @classmethod
+    def ALIGNED_TOP(cls, lines: List[Line], outlined: bool = False, padding: int = 0) -> Self:
+        return cls(lines, SlideStyle.ALIGNED_TOP, outlined=outlined, padding=padding)
+
+    @classmethod
+    def ALIGNED_BOTTOM(cls, lines: List[Line], outlined: bool = False, padding: int = 0) -> Self:
+        return cls(lines, SlideStyle.ALIGNED_BOTTOM, outlined=outlined, padding=padding)
+
+    def __init__(self, lines: List[Line], style: SlideStyle, outlined: bool, padding: int = 0):
         self.lines: List[Line] = lines
         self.style: SlideStyle = style
         self.outlined: bool = outlined
+        self.padding: int = padding
 
 class Presentation:
     def __init__(self,
@@ -202,9 +219,9 @@ class Presentation:
         filler_lines_len = self.height - self.bottom_bar.height - self.top_bar.height - len(text_lines)
         match self.slide.style:
             case SlideStyle.ALIGNED_TOP:
-                return text_lines + self.filler_lines(filler_lines_len)
+                return self.filler_lines(self.slide.padding) + text_lines + self.filler_lines(filler_lines_len - self.slide.padding)
             case SlideStyle.ALIGNED_BOTTOM:
-                return self.filler_lines(filler_lines_len) + text_lines
+                return self.filler_lines(filler_lines_len - self.slide.padding) + text_lines + self.filler_lines(self.slide.padding)
             case SlideStyle.CENTERED_Y:
                 return self.filler_lines(floor(filler_lines_len / 2)) + text_lines + self.filler_lines(ceil(filler_lines_len / 2))
 

@@ -1,5 +1,5 @@
 from termitype.adapters.base import Adapter
-from typing import List, override, Tuple
+from typing import override, Tuple
 import sys
 import os
 import termios

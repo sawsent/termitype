@@ -2,7 +2,7 @@ from termitype.app.context import AppContext
 from termitype.core.engine import TypingEngine
 from termitype.models.engine.run import Run, RunSegment, SegmentType
 from termitype.models.inputevent import InputEvent, InputEventType as IET
-from termitype.models.presentation.presentation import Bar, LineStyle, Presentation, Slide
+from termitype.models.presentation.presentation import Bar, LineStyle, Presentation, Slide, Line
 from termitype.models.settings import Settings
 from termitype.screens.base import Screen
 from termitype.adapters.base import Adapter
@@ -10,6 +10,7 @@ from typing import Optional, override, List, Self
 
 from termitype.utils.color import Color, color, visible_len
 from termitype.utils.visuals import TOP_BAR_MENU
+from termitype.utils.words import chunk_words
 
 class TypingRunScreen(Screen):
     BOT_BAR = Bar.SINGLE(["[ESC] settings", "[TAB] restart" ], style=LineStyle.ALIGNED_RIGHT(padding_right=2, gap=5))
@@ -33,11 +34,11 @@ class TypingRunScreen(Screen):
 
     def get_presentation(self, slide: Slide) -> Presentation:
         return Presentation(
+            slide=slide,
             width=self.settings.width,
             height=self.settings.height,
-            top_bar=TOP_BAR_MENU,
+            top_bar=TOP_BAR_MENU if self.settings.show_logo else Bar.EMPTY(),
             bottom_bar=self.BOT_BAR,
-            slide=slide,
             show_outline=self.context.settings.display_outline
         )
 
@@ -56,14 +57,14 @@ class TypingRunScreen(Screen):
         return self.get_presentation(Slide.CENTERED_XY(lines=["something went wrong"]))
 
     def render_in_play_run(self, run: Run) -> Presentation:
-        text_lines = self.chunk_words(self.colored_run_segments(run.get_segments()), self.settings.test_text_max_width)
+        text_lines = chunk_words(self.colored_run_segments(run.get_segments()), self.settings.test_text_max_width)
 
         return self.get_presentation(
             Slide.CENTERED_XY(lines=[""] + text_lines)
         )
 
     def render_unstarted_run(self, run: Run) -> Presentation:
-        text_lines = self.chunk_words(self.colored_run_segments(run.get_segments()), self.settings.test_text_max_width)
+        text_lines = chunk_words(self.colored_run_segments(run.get_segments()), self.settings.test_text_max_width)
 
         return self.get_presentation(
             Slide.CENTERED_XY(lines=["Type any letter to start!"] + text_lines)
@@ -73,10 +74,9 @@ class TypingRunScreen(Screen):
         report = run.get_run_report()
         if report is not None:
             return self.get_presentation(
-                slide=Slide.CENTERED_XY(lines=[
-                    f"time: {round(report.time_s, 2)}, wpm: {report.wpm}, accuracy: {report.accuracy}%",
-                    "",
-                    "[s] save run"
+                slide=Slide.CENTERED([
+                    Line.CENTER([f"WPM: {report.wpm}"], outlined=True),
+                    Line.CENTER([f"time: {round(report.time_s, 2)}s, accuracy: {report.accuracy}%"], padding=20),
                 ])
             )
         else:
@@ -88,7 +88,7 @@ class TypingRunScreen(Screen):
         for seg in segments:
             match seg.segment_type:
                 case SegmentType.CORRECT:
-                    as_text += color(seg.text, Color.BRIGHT_WHITE)
+                    as_text += seg.text # color(seg.text, Color.BRIGHT_WHITE)
                 case SegmentType.INCORRECT:
                     as_text += color(seg.text, Color.RED)
                 case SegmentType.TO_BE_TYPED:
@@ -97,30 +97,6 @@ class TypingRunScreen(Screen):
                     as_text += color(seg.text, Color.CYAN)
 
         return as_text
-
-
-    def chunk_words(self, text: str, size: int) -> List[str]:
-        text = text.strip()
-        if not text:
-            return []
-
-        words = text.split()
-        lines: List[str] = []
-        current_line = ""
-
-        for word in words:
-            if not current_line:
-                current_line = word
-            elif visible_len(current_line) + 1 + visible_len(word) <= size:
-                current_line += " " + word
-            else:
-                lines.append(current_line)
-                current_line = word
-
-        if current_line:
-            lines.append(current_line)
-
-        return lines
 
     @override
     def handle_input(self, input_event: InputEvent):
@@ -134,7 +110,7 @@ class TypingRunScreen(Screen):
                     case _:
                         pass
             case IET.ESCAPE:
-                self.__next_screen = self.context.settings_screen
+                self.__next_screen = self.context.settings_screen.restart()
             case IET.BACKSPACE:
                 self.engine.backspace()
             case IET.TAB:
@@ -144,9 +120,6 @@ class TypingRunScreen(Screen):
 
     @override
     def next_screen(self) -> Optional[Screen]:
-        next = self.__next_screen
-        if self.__next_screen is not self:
-            self.restart()
-        return next 
+        return self.__next_screen
 
 

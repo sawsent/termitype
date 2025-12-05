@@ -39,7 +39,7 @@ class StorageManager:
                     "show_logo": settings.show_logo
                 }
             }
-            json.dump(settings_dict, f, indent=2)
+            json.dump(settings_dict, f, indent=4)
 
 
 

@@ -1,21 +1,16 @@
 {
-  "display": {
-    "width": 100,
-    "height": 30,
-    "outline": true
-  },
-  "typing": {
-    "language": "english",
-    "line_max_width": 90,
-    "word_count": 100,
-    "display_style": {
-      "type": "block",
-      "ahead": 2,
-      "behind": 2
+    "display": {
+        "width": 70,
+        "height": 20,
+        "outline": true
+    },
+    "typing": {
+        "language": "english",
+        "line_max_width": 50,
+        "word_count": 5
+    },
+    "general": {
+        "show_exit_message": true,
+        "show_logo": false
     }
-  },
-  "general": {
-    "show_exit_message": true,
-    "show_logo": true
-  }
 }

@@ -1,15 +1,15 @@
+from termitype.app.context import AppContext
 from termitype.models.inputevent import InputEvent, InputEventType as IET
 from termitype.models.presentation.presentation import Presentation, Line, Slide
 from termitype.screens.base import Screen
 from typing import Optional, Dict, Self, override
-from termitype.models.settings import DisplaySettings
+from termitype.models.settings import DisplaySettings, Settings
 from termitype.utils.topbar import TOP_BAR_MENU
 
 class MenuScreen(Screen):
 
-    def __init__(self, settings: DisplaySettings):
-        super().__init__(settings)
-
+    def __init__(self, context: AppContext):
+        self.context = context
         self.screens: Dict[str, Screen] = {}
         self.screen_descriptions: Dict[str, str] = {}
         self.__next_screen: Optional[Screen] = self
@@ -19,6 +19,10 @@ class MenuScreen(Screen):
         self.screens[id] = view
         self.screen_descriptions[id] = description
         return self
+
+    @property
+    def settings(self) -> Settings:
+        return self.context.settings
 
     @override
     def render(self) -> Presentation:

@@ -106,11 +106,9 @@ class Run:
 
     def get_segments(self) -> List[RunSegment]:
         segments_by_word = self.__get_segments()
-        for idx, word in enumerate(segments_by_word):
-            if idx == len(segments_by_word) - 1:
-                break
+        for word in segments_by_word:
             word.append(RunSegment.SPACE())
-        return [ x for group in segments_by_word for x in group ]
+        return [ w for word in segments_by_word for w in word ]
 
     def __get_segments(self) -> List[List[RunSegment]]:
         typed_words: List[List[RunSegment]] = []

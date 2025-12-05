@@ -1,3 +1,5 @@
+from termitype.app.app import App
+from termitype.app.context import AppContext
 from termitype.core.engine import TypingEngine
 from termitype.models.engine.run import Run, RunSegment, SegmentType
 from termitype.models.inputevent import InputEvent, InputEventType as IET
@@ -13,13 +15,20 @@ from termitype.utils.topbar import TOP_BAR_MENU
 class TypingRunScreen(Screen):
     BOT_BAR = Bar.SINGLE(["[ESC] settings", "[TAB] restart" ], style=BarStyle.ALIGNED_RIGHT(padding_right=2, gap=5))
 
-    def __init__(self, adapter: Adapter, menu: Screen, typing_engine: TypingEngine, settings: Settings):
-        super().__init__(DisplaySettings.from_settings(settings))
-        self.run_settings = TypingRunSettings.from_settings(settings)
-        self.adapter: Adapter = adapter
-        self.__return_to: Screen = menu
+    def __init__(self, context: AppContext, typing_engine: TypingEngine):
+        self.context = context
+        self.adapter: Adapter = context.adapter
+        self.__return_to: Screen = context.menu_screen
         self.engine = typing_engine
         self.restart()
+
+    @property
+    def run_settings(self) -> TypingRunSettings:
+        return TypingRunSettings.from_settings(self.settings)
+
+    @property
+    def settings(self) -> Settings:
+        return self.context.settings
 
     @override
     def restart(self) -> Self:

@@ -1,4 +1,4 @@
-from termitype.cli.entrypoint import main
+from termitype.cli.bootstrap import main
 
 if __name__ == "__main__":
     main()

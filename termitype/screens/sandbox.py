@@ -1,3 +1,4 @@
+from termitype.app.context import AppContext
 from termitype.models.inputevent import InputEvent, InputEventType as IET
 from termitype.models.presentation.presentation import Bar, BarStyle, Presentation, Line, Slide
 from termitype.models.settings import DisplaySettings
@@ -9,11 +10,15 @@ from termitype.utils.topbar import TOP_BAR_MENU
 
 class SandboxScreen(Screen):
 
-    def __init__(self, adapter: Adapter, menu: Screen, settings: DisplaySettings):
-        super().__init__(settings)
-        self.adapter: Adapter = adapter
-        self.__return_to: Screen = menu
+    def __init__(self, context: AppContext):
+        self.context = context
+        self.adapter: Adapter = context.adapter
+        self.__return_to: Screen = context.menu_screen
         self.restart()
+
+    @property
+    def settings(self):
+        return self.context.settings
 
     @override
     def restart(self) -> Self:
@@ -26,7 +31,7 @@ class SandboxScreen(Screen):
 
     @override
     def render(self) -> Presentation:
-        text_lines = self.chunk_words(self.text, self.settings.width)
+        text_lines = self.chunk_words(self.text, self.settings.test_text_max_width)
         bot = Bar.SINGLE(["[ESC] menu", "[TAB] clear text"], style=BarStyle.ALIGNED_RIGHT(gap=5, padding_right=2), show_outline=True)
         slide = Slide.CENTERED_XY(text_lines)
         return Presentation(

@@ -1,17 +1,22 @@
 from typing import List, Optional
 import random
 
+from termitype.app.context import AppContext
 from termitype.models.engine.run import Run
 from termitype.models.settings import TypingRunSettings
 
 
 class TypingEngine:
-    def __init__(self, word_list: List[str]) -> None:
-        self.word_list: List[str] = word_list
+    def __init__(self, context: AppContext) -> None:
+        self.context = context
         self.current_run: Optional[Run] = None
 
+    @property
+    def language(self) -> List[str]:
+        return self.context.language
+
     def new_run(self, settings: TypingRunSettings):
-        words = random.choices(self.word_list, k=settings.words)
+        words = random.choices(self.language, k=settings.words)
         self.current_run = Run(words)
 
     def type_char(self, char: str) -> None:

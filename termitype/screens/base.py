@@ -9,9 +9,6 @@ class Screen(ABC):
     Abstract base class for all Views in Termitype.
     Each view must implement rendering, input handling, and next state logic.
     """
-    def __init__(self, settings: DisplaySettings):
-        self.settings = settings
-
     @abstractmethod
     def restart(self) -> Self:
         """

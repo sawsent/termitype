@@ -1,9 +1,10 @@
 from typing import Optional
 from termitype.screens.base import Screen
 from termitype.adapters.base import Adapter
+from termitype.storage.storagemanager import StorageManager
+
 
 class App:
-
     def __init__(self, adapter: Adapter, starting_view: Screen):
         self.adapter = adapter
         self.screen: Optional[Screen] = starting_view

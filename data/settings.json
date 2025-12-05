@@ -1,0 +1,17 @@
+{
+    "display": {
+        "width": 100,
+        "height": 30,
+        "outline": true
+    },
+    "typing": {
+        "language": "english",
+        "line_max_width": 90,
+        "word_count":  100,
+        "display_style": {
+            "type": "BLOCK",
+            "ahead": 2,
+            "behind": 2
+        }
+    }
+}

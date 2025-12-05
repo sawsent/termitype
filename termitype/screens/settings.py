@@ -1,4 +1,5 @@
 from termitype.adapters.base import Adapter
+from termitype.app.context import AppContext
 from termitype.models.inputevent import InputEvent, InputEventType as IET
 from termitype.models.presentation.presentation import Bar, BarStyle, Presentation, Line, Slide
 from termitype.models.settings import DisplaySettings
@@ -9,12 +10,16 @@ from termitype.utils.topbar import TOP_BAR_MENU
 
 class SettingsScreen(Screen):
 
-    def __init__(self, adapter: Adapter, menu: Screen, run_screen: Screen, settings: DisplaySettings):
-        super().__init__(settings)
-        self.adapter: Adapter = adapter
-        self.menu: Screen = menu
-        self.run_screen: Screen = run_screen
+    def __init__(self, context: AppContext):
+        self.context = context
+        self.adapter: Adapter = context.adapter
+        self.menu: Screen = context.menu_screen
+        self.run_screen: Screen = context.run_screen
         self.restart()
+
+    @property
+    def settings(self):
+        return self.context.settings
         
     @override
     def restart(self) -> Self:
@@ -40,6 +45,9 @@ class SettingsScreen(Screen):
                 self.__next_screen = self.run_screen
             case IET.CHAR: 
                 self.last_key_press = input_event.char
+                match input_event.char:
+                    case "w": self.context.update_settings(width=self.context.settings.width + 1)
+                    case "W": self.context.update_settings(width=self.context.settings.width - 1)
             case _:
                 pass
 

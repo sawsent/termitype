@@ -78,7 +78,6 @@ ruff_cache/
 # 🧠 Project specific (Termitype)
 # =====================================
 # Local data, words, logs, etc.
-data/*.json
 data/*.log
 data/*.db
 

@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import Self
 from dataclasses import dataclass
 
 
@@ -17,28 +16,6 @@ class Settings():
     test_style: TestStyle = TestStyle.BLOCK
     ahead: int = 2
     behind: int = 2
-
-@dataclass(frozen=True)
-class DisplaySettings():
-    width: int
-    height: int
-
-    @classmethod
-    def from_settings(cls, settings: Settings) -> Self:
-        return cls(
-            width = settings.width,
-            height = settings.height
-        )
-
-@dataclass
-class TypingRunSettings():
-    words: int
-    test_text_max_width: int
-
-    @classmethod
-    def from_settings(cls, settings: Settings) -> Self:
-        return cls(
-            words = settings.test_word_count,
-            test_text_max_width = settings.test_text_max_width
-        )
+    show_exit_message: bool = True
+    display_outline: bool = True
 

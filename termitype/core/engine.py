@@ -3,7 +3,6 @@ import random
 
 from termitype.app.context import AppContext
 from termitype.models.engine.run import Run
-from termitype.models.settings import TypingRunSettings
 
 
 class TypingEngine:
@@ -15,8 +14,8 @@ class TypingEngine:
     def language(self) -> List[str]:
         return self.context.language
 
-    def new_run(self, settings: TypingRunSettings):
-        words = random.choices(self.language, k=settings.words)
+    def new_run(self, word_amount: int):
+        words = random.choices(self.language, k=word_amount)
         self.current_run = Run(words)
 
     def type_char(self, char: str) -> None:

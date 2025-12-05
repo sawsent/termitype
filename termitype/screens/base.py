@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from typing import Self, Optional
 from termitype.models.inputevent import InputEvent
 from termitype.models.presentation.presentation import Presentation
-from termitype.models.settings import DisplaySettings
 
 class Screen(ABC):
     """
@@ -40,12 +39,3 @@ class Screen(ABC):
         :return: Another BaseView instance or None (to quit)
         """
         pass
-
-    def return_to(self) -> Optional[Self]:
-        """
-        Determine what the on-quit view should be
-
-        :return: Another View instance or None (to quit)
-        """
-        return None
-

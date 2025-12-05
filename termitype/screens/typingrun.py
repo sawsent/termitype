@@ -1,30 +1,24 @@
-from termitype.app.app import App
 from termitype.app.context import AppContext
 from termitype.core.engine import TypingEngine
 from termitype.models.engine.run import Run, RunSegment, SegmentType
 from termitype.models.inputevent import InputEvent, InputEventType as IET
-from termitype.models.presentation.presentation import Bar, BarStyle, Presentation, Line, Slide
-from termitype.models.settings import DisplaySettings, Settings, TypingRunSettings
+from termitype.models.presentation.presentation import Bar, LineStyle, Presentation, Slide
+from termitype.models.settings import Settings
 from termitype.screens.base import Screen
 from termitype.adapters.base import Adapter
 from typing import Optional, override, List, Self
 
 from termitype.utils.color import Color, color, visible_len
-from termitype.utils.topbar import TOP_BAR_MENU
+from termitype.utils.visuals import TOP_BAR_MENU
 
 class TypingRunScreen(Screen):
-    BOT_BAR = Bar.SINGLE(["[ESC] settings", "[TAB] restart" ], style=BarStyle.ALIGNED_RIGHT(padding_right=2, gap=5))
+    BOT_BAR = Bar.SINGLE(["[ESC] settings", "[TAB] restart" ], style=LineStyle.ALIGNED_RIGHT(padding_right=2, gap=5))
 
     def __init__(self, context: AppContext, typing_engine: TypingEngine):
         self.context = context
         self.adapter: Adapter = context.adapter
-        self.__return_to: Screen = context.menu_screen
         self.engine = typing_engine
         self.restart()
-
-    @property
-    def run_settings(self) -> TypingRunSettings:
-        return TypingRunSettings.from_settings(self.settings)
 
     @property
     def settings(self) -> Settings:
@@ -32,10 +26,9 @@ class TypingRunScreen(Screen):
 
     @override
     def restart(self) -> Self:
-        self.last_key_press: str = ""
         self.is_to_return: bool = False
         self.__next_screen: Optional[Screen] = self
-        self.engine.new_run(self.run_settings)
+        self.engine.new_run(self.settings.test_word_count)
         return self
 
     def get_presentation(self, slide: Slide) -> Presentation:
@@ -44,7 +37,8 @@ class TypingRunScreen(Screen):
             height=self.settings.height,
             top_bar=TOP_BAR_MENU,
             bottom_bar=self.BOT_BAR,
-            slide=slide
+            slide=slide,
+            show_outline=self.context.settings.display_outline
         )
 
 
@@ -62,14 +56,14 @@ class TypingRunScreen(Screen):
         return self.get_presentation(Slide.CENTERED_XY(lines=["something went wrong"]))
 
     def render_in_play_run(self, run: Run) -> Presentation:
-        text_lines = self.chunk_words(self.colored_run_segments(run.get_segments()), self.run_settings.test_text_max_width)
+        text_lines = self.chunk_words(self.colored_run_segments(run.get_segments()), self.settings.test_text_max_width)
 
         return self.get_presentation(
             Slide.CENTERED_XY(lines=[""] + text_lines)
         )
 
     def render_unstarted_run(self, run: Run) -> Presentation:
-        text_lines = self.chunk_words(self.colored_run_segments(run.get_segments()), self.run_settings.test_text_max_width)
+        text_lines = self.chunk_words(self.colored_run_segments(run.get_segments()), self.settings.test_text_max_width)
 
         return self.get_presentation(
             Slide.CENTERED_XY(lines=["Type any letter to start!"] + text_lines)
@@ -140,23 +134,19 @@ class TypingRunScreen(Screen):
                     case _:
                         pass
             case IET.ESCAPE:
-                self.is_to_return = True
+                self.__next_screen = self.context.settings_screen
             case IET.BACKSPACE:
                 self.engine.backspace()
             case IET.TAB:
-                self.engine.new_run(self.run_settings)
+                self.engine.new_run(self.settings.test_word_count)
             case _:
                 pass
 
     @override
     def next_screen(self) -> Optional[Screen]:
-        if self.is_to_return:
-            self.is_to_return = False
-            return self.return_to()
-        return self.__next_screen
-
-    @override
-    def return_to(self) -> Optional[Screen]:
-        return self.__return_to
+        next = self.__next_screen
+        if self.__next_screen is not self:
+            self.restart()
+        return next 
 
 

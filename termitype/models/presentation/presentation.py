@@ -5,10 +5,10 @@ from termitype.models.presentation.cursor import Cursor
 from termitype.models.presentation.highlight import Highlight
 from math import floor, ceil
 
-from termitype.utils.color import visible_len
+from termitype.utils.color import visible_len as v_len
 
 def outline(lines: List[str]) -> List[str]:
-    width = visible_len(lines[0]) if lines else 0
+    width = v_len(lines[0]) if lines else 0
     return [ f"┌{"─" * width}┐" ] + [ f"│{l}│" for l in lines ] + [ f"└{"─" * width}┘" ]
 
 def pad(lines: List[str], amount: int) -> List[str]:
@@ -18,30 +18,8 @@ def pad(lines: List[str], amount: int) -> List[str]:
 def filler(amount: int, filler_char: str = " ") -> str:
         return filler_char * amount
 
-class LineStyle(Enum):
-    CENTERED = 1
-    ALIGNED_LEFT = 2
-    ALIGNED_RIGHT = 3
 
-class Line:
-    @classmethod
-    def EMPTY(cls) -> Self:
-        return cls("", LineStyle.CENTERED, outlined=False)
-
-    @classmethod
-    def CENTERED(cls, text: str) -> Self:
-        return cls(text, LineStyle.CENTERED, outlined=False)
-
-    @classmethod
-    def CENTERED_LINES(cls, lines: List[str]) -> List[Self]:
-        return [cls.CENTERED(line) for line in lines]
-
-    def __init__(self, text: str, style: LineStyle, outlined: bool):
-        self.text: str = text
-        self.style: LineStyle = style
-        self.outlined = outlined
-
-class BarStyle:
+class LineStyle:
     DINAMIC = -1
     IGNORE = -2
 
@@ -49,42 +27,91 @@ class BarStyle:
     ALIGN_LEFT: int = 1 
     ALIGN_RIGHT: int = 2
 
+    @classmethod
+    def CENTERED(cls, padding: int = 0, outlined: bool = False) -> Self:
+        return cls(cls.CENTER, padding, padding, cls.DINAMIC, outlined)
 
     @classmethod
-    def CENTERED(cls, padding: int = 0) -> Self:
-        return cls(cls.CENTER, padding, padding, cls.DINAMIC)
+    def ALIGNED_LEFT(cls, padding_left: int = 0, gap: int = 1, outlined: bool = False) -> Self:
+        return cls(cls.ALIGN_LEFT, padding_left, cls.IGNORE, gap, outlined)
 
     @classmethod
-    def ALIGNED_LEFT(cls, padding_left: int = 0, gap: int = 1) -> Self:
-        return cls(cls.ALIGN_LEFT, padding_left, cls.IGNORE, gap)
+    def ALIGNED_RIGHT(cls, padding_right: int = 0, gap: int = 1, outlined: bool = False) -> Self:
+        return cls(cls.ALIGN_RIGHT, cls.IGNORE, padding_right, gap, outlined)
 
-    @classmethod
-    def ALIGNED_RIGHT(cls, padding_right: int = 0, gap: int = 1) -> Self:
-        return cls(cls.ALIGN_RIGHT, cls.IGNORE, padding_right, gap)
-
-    def __init__(self, style_id: int, padding_left: int, padding_right: int, gap: int) -> None:
+    def __init__(self, style_id: int, padding_left: int, padding_right: int, gap: int, outlined: bool) -> None:
         self.id: int = style_id
         self.padding_left: int = padding_left
         self.padding_right: int = padding_right
         self.gap: int = gap
+        self.outlined: bool = outlined
+
+class Line:
+    @classmethod
+    def EMPTY(cls) -> Self:
+        return cls([""], LineStyle.CENTERED())
+
+    @classmethod
+    def CENTERED(cls, text: str) -> Self:
+        return cls([text], LineStyle.CENTERED())
+
+    @classmethod
+    def CENTERED_LINES(cls, lines: List[str]) -> List[Self]:
+        return [cls.CENTERED(line) for line in lines]
+
+    def __init__(self, elements: List[str], style: LineStyle):
+        self.elements: List[str] = elements
+        self.style: LineStyle = style
+
+    @property
+    def text(self) -> str:
+        return " ".join(self.elements)
+    
+    def as_text(self, total_width: int) -> List[str]:
+        without_outline = self.without_outline_text(total_width)
+        return outline([without_outline]) if self.style.outlined else [without_outline]
+
+    def without_outline_text(self, total_width: int) -> str:
+        if len(self.elements) == 0:
+            return filler(total_width)
+        match self.style.id:
+            case LineStyle.CENTER:
+                if len(self.elements) == 1:
+                    half_filler = (total_width - v_len(self.elements[0])) / 2
+                    return filler(floor(half_filler)) + self.elements[0] + filler(ceil(half_filler))
+                empty_space = total_width - sum([v_len(element) for element in self.elements]) - self.style.padding_right - self.style.padding_left
+                space_between = filler(floor(empty_space / (len(self.elements) - 1)))
+                without_padding = space_between.join(self.elements)
+                return filler(self.style.padding_left) + without_padding + filler(total_width - self.style.padding_left - v_len(without_padding))
+            case LineStyle.ALIGN_LEFT:
+                space_between = " " * self.style.gap
+                without_padding = space_between.join(self.elements)
+                return filler(self.style.padding_left) + without_padding + filler(total_width - self.style.padding_left - v_len(without_padding))
+            case LineStyle.ALIGN_RIGHT:
+                space_between = " " * self.style.gap
+                without_padding = space_between.join(self.elements)
+                return filler(total_width - self.style.padding_right - v_len(without_padding)) + without_padding + filler(self.style.padding_right)
+
+        return filler(total_width)
+
 
 class Bar:
     @classmethod
     def EMPTY(cls) -> Self:
-        return cls([], False, BarStyle.CENTERED())
+        return cls([], False, LineStyle.CENTERED())
 
     @classmethod
-    def SINGLE(cls, elements: List[str], show_outline: bool = False, style: BarStyle = BarStyle.CENTERED()) -> Self:
+    def SINGLE(cls, elements: List[str], show_outline: bool = False, style: LineStyle = LineStyle.CENTERED()) -> Self:
         return cls([elements], show_outline, style)
 
     @classmethod
-    def MULTIPLE(cls, lines: List[List[str]], show_outline: bool = False, style: BarStyle = BarStyle.CENTERED()) -> Self:
+    def MULTIPLE(cls, lines: List[List[str]], show_outline: bool = False, style: LineStyle = LineStyle.CENTERED()) -> Self:
         return cls(lines, show_outline, style)
 
-    def __init__(self, lines: List[List[str]], show_outline: bool, style: BarStyle):
+    def __init__(self, lines: List[List[str]], show_outline: bool, style: LineStyle):
         self.lines: List[List[str]] = lines
         self.show_outline: bool = show_outline
-        self.style: BarStyle = style
+        self.style: LineStyle = style
 
     @property
     def height(self) -> int:
@@ -100,22 +127,22 @@ class Bar:
         if len(line) == 0:
             return filler(total_width)
         match self.style.id:
-            case BarStyle.CENTER:
+            case LineStyle.CENTER:
                 if len(line) == 1:
-                    half_filler = (total_width - len(line[0])) / 2
+                    half_filler = (total_width - v_len(line[0])) / 2
                     return filler(floor(half_filler)) + line[0] + filler(ceil(half_filler))
-                empty_space = total_width - sum([len(element) for element in line]) - self.style.padding_right - self.style.padding_left
+                empty_space = total_width - sum([v_len(element) for element in line]) - self.style.padding_right - self.style.padding_left
                 space_between = filler(floor(empty_space / (len(line) - 1)))
                 without_padding = space_between.join(line)
-                return filler(self.style.padding_left) + without_padding + filler(total_width - self.style.padding_left - len(without_padding))
-            case BarStyle.ALIGN_LEFT:
+                return filler(self.style.padding_left) + without_padding + filler(total_width - self.style.padding_left - v_len(without_padding))
+            case LineStyle.ALIGN_LEFT:
                 space_between = " " * self.style.gap
                 without_padding = space_between.join(line)
-                return filler(self.style.padding_left) + without_padding + filler(total_width - self.style.padding_left - len(without_padding))
-            case BarStyle.ALIGN_RIGHT:
+                return filler(self.style.padding_left) + without_padding + filler(total_width - self.style.padding_left - v_len(without_padding))
+            case LineStyle.ALIGN_RIGHT:
                 space_between = " " * self.style.gap
                 without_padding = space_between.join(line)
-                return filler(total_width - self.style.padding_right - len(without_padding)) + without_padding + filler(self.style.padding_right)
+                return filler(total_width - self.style.padding_right - v_len(without_padding)) + without_padding + filler(self.style.padding_right)
 
         return filler(total_width)
         
@@ -186,23 +213,5 @@ class Presentation:
         return [ filler(self.width) for _ in range(amount) ]
 
     def get_text_from_lines(self) -> List[str]:
-        lines = []
-        for line in self.slide.lines:
-            for l in self.align_line(line):
-                lines.append(l)
-        return lines
-        
-    def align_line(self, line: Line) -> List[str]:
-        with_outline = outline([line.text]) if line.outlined else [line.text]
-
-        total_filler_amount = self.width - visible_len(with_outline[0])
-        total_filler = filler(total_filler_amount)
-        match line.style:
-            case LineStyle.ALIGNED_LEFT:
-                return [l + total_filler for l in with_outline]
-            case LineStyle.ALIGNED_RIGHT:
-                return [total_filler + l for l in with_outline]
-            case LineStyle.CENTERED:
-                return [filler((floor(total_filler_amount / 2))) + l + filler((ceil(total_filler_amount / 2))) for l in with_outline]
-
+        return [a for line in self.slide.lines for a in line.as_text(self.width)]
 

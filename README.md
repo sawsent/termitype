@@ -17,19 +17,6 @@ Termitype focuses on:
 
 ---
 
-## Screenshots
-
-### Typing screen  
-![typing screen](./media/run-screen.png)
-
-### Results screen
-![results screen](./media/results-screen.png)
-
-### Settings screen (with search)
-![settings search](./media/settings-screen.png)
-
----
-
 ## Features
 
 ### ✔ Minimal, beautiful terminal UI  
@@ -106,6 +93,19 @@ Or run it directly:
 ```bash
 python3 -m termitype
 ```
+
+---
+
+## Screenshots
+
+### Typing screen  
+![typing screen](./media/run-screen.png)
+
+### Results screen
+![results screen](./media/results-screen.png)
+
+### Settings screen (with search)
+![settings search](./media/settings-screen.png)
 
 ---
 

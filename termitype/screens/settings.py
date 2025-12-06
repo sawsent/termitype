@@ -39,6 +39,13 @@ class SettingsScreen(Screen):
                     return tmp
         return {}
 
+    def get_first_setting_index_starting_with(self, prefix: str) -> int:
+        for _, values in self.descs.items():
+            for name, setting in values.items():
+                if name.startswith(prefix):
+                    return setting["index"]
+        return self.setting_index
+
     @property
     def current_setting(self) -> Dict:
         return self.get_setting(self.setting_index)
@@ -51,6 +58,8 @@ class SettingsScreen(Screen):
         self.setting_selected = False
         self.current_updating_text = ""
         self.has_typed_first_character = False
+        self.searching = False
+        self.searching_text = ""
         return self
 
     def render(self) -> Presentation:
@@ -65,7 +74,7 @@ class SettingsScreen(Screen):
             width=self.context.settings.width,
             height=self.context.settings.height,
             top_bar=TOP_BAR_MENU if self.context.settings.show_logo else Bar.EMPTY(),
-            bottom_bar=Bar.SINGLE(["[ENTER] select", "[k] up", "[j] down", "[TAB] run", "[q] quit"], style=LineStyle.ALIGNED_RIGHT(gap=5, padding_right=2)),
+            bottom_bar=Bar.SINGLE(["[ESC] search", "[ENTER] select", "[k/j] up/down", "[TAB] run", "[q] quit"], style=LineStyle.ALIGNED_RIGHT(gap=5, padding_right=2)),
             show_outline=self.context.settings.display_outline
 
         )
@@ -93,20 +102,24 @@ class SettingsScreen(Screen):
 
     def get_settings_lines(self) -> List[Line]:
         lines = []
+        if self.searching:
+            lines.append(Line.CENTER([color("Search...", fg=Color.BRIGHT_BLACK) if self.searching_text == "" else self.searching_text], outlined=True))
+            lines.append(Line.EMPTY())
         for t in self.descs:
             lines.append(Line.ALIGNED_LEFT([char for char in f"[{t.upper()}]"], 10, 1))
 
             for key, setting in self.descs[t].items():
-                if self.setting_index == setting["index"]:
-                    lines.append(Line.CENTER([f"{key}:", str(setting["value"])], padding=15, color=Color.WHITE, bg=Bg.BRIGHT_BLACK))
-                    [
-                        lines.append(
-                            Line.ALIGNED_LEFT([pad(l, l=3, r=self.context.settings.width - 33 - len(l))], gap=0, padding_left=15, color=Color.WHITE, bg=Bg.BRIGHT_BLACK)
-                        )
-                        for l in chunk_words(setting["desc"], self.context.settings.width - 35)
-                    ]
-                else:
-                    lines.append(Line.CENTER([f"{key}:", str(setting["value"])], padding=15))
+                if key.lower().startswith(self.searching_text):
+                    if self.setting_index == setting["index"]:
+                        lines.append(Line.CENTER([f"{key}:", str(setting["value"])], padding=15, color=Color.WHITE, bg=Bg.BRIGHT_BLACK))
+                        [
+                            lines.append(
+                                Line.ALIGNED_LEFT([pad(l, l=3, r=self.context.settings.width - 33 - len(l))], gap=0, padding_left=15, color=Color.WHITE, bg=Bg.BRIGHT_BLACK)
+                            )
+                            for l in chunk_words(setting["desc"], self.context.settings.width - 35)
+                        ]
+                    else:
+                        lines.append(Line.CENTER([f"{key}:", str(setting["value"])], padding=15))
 
             lines.append(Line.EMPTY())
 
@@ -122,20 +135,28 @@ class SettingsScreen(Screen):
     def no_setting_selected_handler(self, input_event: InputEvent):
         match input_event.type:
             case IET.ESCAPE:
-                self.__next_screen = None
+                self.searching = not self.searching
+                self.searching_text = ""
             case IET.TAB:
                 self.__next_screen = self.context.run_screen.restart()
             case IET.ENTER:
                 self.setting_selected = not self.setting_selected
                 self.current_updating_text = self.current_setting["value"]
 
+            case IET.BACKSPACE:
+                self.searching_text = self.searching_text[:-1]
+
             case IET.CHAR: 
-                match input_event.char:
-                    case "q": self.__next_screen = None
-                    case "j":
-                        self.setting_index = min(self.setting_index + 1, self.max_index)
-                    case "k":
-                        self.setting_index = max(self.setting_index - 1, 0)
+                if not self.searching:
+                    match input_event.char:
+                        case "q": self.__next_screen = None
+                        case "j":
+                            self.setting_index = min(self.setting_index + 1, self.max_index)
+                        case "k":
+                            self.setting_index = max(self.setting_index - 1, 0)
+                else:
+                    self.searching_text += input_event.char
+                    self.setting_index = self.get_first_setting_index_starting_with(self.searching_text)
             case _:
                 pass
 
@@ -149,6 +170,8 @@ class SettingsScreen(Screen):
                 self.update_setting(self.setting_index, self.current_updating_text)
                 self.setting_selected = False
                 self.has_typed_first_character = False
+                self.searching = False
+                self.searching_text = ""
             case IET.BACKSPACE:
                 self.current_updating_text = self.current_updating_text[:-1]
             case IET.CHAR:

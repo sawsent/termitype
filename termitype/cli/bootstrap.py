@@ -24,6 +24,8 @@ def main():
     typing_run_screen = TypingRunScreen(context, engine)
     context.run_screen = typing_run_screen
 
+    context.load_runs()
+
     app = App(adapter, typing_run_screen)
 
     try:

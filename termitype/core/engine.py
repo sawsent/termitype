@@ -25,9 +25,9 @@ class TypingEngine:
         if self.current_run is not None and self.current_run.in_play:
             self.current_run.type_char(char)
             if self.current_run.should_auto_finish():
-                self.current_run.auto_finish()
-            elif self.current_run.should_finish():
-                self.current_run.finish()
+                self.current_run.auto_finish_prep()
+            if self.current_run.should_finish():
+                self.end_run()
 
     def backspace(self) -> None:
         if self.current_run is not None and self.current_run.in_play:
@@ -40,6 +40,9 @@ class TypingEngine:
     def end_run(self):
         if self.current_run is not None:
             self.current_run.finish()
+            report = self.current_run.get_run_report()
+            if report is not None:
+                self.context.runs.append(report)
 
     @property
     def is_run_in_play(self) -> bool:

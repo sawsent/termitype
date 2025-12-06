@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import List
 from termitype.models.engine.runreport import RunReport
 from termitype.models.settings import Settings
-from termitype.storage.paths import SETTINGS_PATH, LANGUAGES_PATH
+from termitype.storage.paths import RUNS_PATH, SETTINGS_PATH, LANGUAGES_PATH
 
 
 class StorageManager:
@@ -52,7 +52,13 @@ class StorageManager:
             return []
 
     def load_runs(self) -> List[RunReport]:
+        if Path.exists(RUNS_PATH):
+            with open(RUNS_PATH, "r") as f:
+                runs_dict = json.load(f)
+                return [RunReport.from_dict(d) for d in runs_dict["runs"]]
         return []
 
-    def save_run(self, run: RunReport) -> bool:
-        return True
+    def save_runs(self, runs: List[RunReport]) -> None:
+        with open(RUNS_PATH, "w") as f:
+            json.dump({"runs": [run.as_dict for run in runs]}, f, indent=4)
+

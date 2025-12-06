@@ -103,13 +103,8 @@ class TypingRunScreen(Screen):
         match input_event.type:
             case IET.CHAR if not self.engine.is_run_finished:
                 self.engine.type_char(input_event.char)
-            case IET.CHAR if self.engine.is_run_finished:
-                match input_event.char:
-                    case "s":
-                        "save run"
-                    case _:
-                        pass
             case IET.ESCAPE:
+                self.context.save_runs()
                 self.__next_screen = self.context.settings_screen.restart()
             case IET.BACKSPACE:
                 self.engine.backspace()

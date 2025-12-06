@@ -1,0 +1,26 @@
+{
+    "runs": [
+        {
+            "start_time": 1765062194590323000,
+            "end_time": 1765062200207565000,
+            "time_ns": 5617242000,
+            "time_s": 5.617242,
+            "typed": "small down problem use it people since eye these by  ",
+            "expected": "small down problem use it people since eye these by",
+            "wpm": 90,
+            "accuracy": 100,
+            "word_amount": 10
+        },
+        {
+            "start_time": 1765062203424477000,
+            "end_time": 1765062205143271000,
+            "time_ns": 1718794000,
+            "time_s": 1.718794,
+            "typed": "course come cven ce ctate cy cirst ceep clace cill  ",
+            "expected": "course some even he state by first keep place will",
+            "wpm": 286,
+            "accuracy": 2,
+            "word_amount": 10
+        }
+    ]
+}

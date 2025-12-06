@@ -58,10 +58,9 @@ class Run:
         cw = self.current_word
         return len(wl) == len(self.words_typed) + 1 and len(wl[-1]) == len(cw) and wl[-1][-1] == cw[-1]
 
-    def auto_finish(self) -> None:
+    def auto_finish_prep(self) -> None:
         self.words_typed.append(self.current_word)
         self.current_word = ""
-        self.finish()
 
     def should_finish(self) -> bool:
         return len(self.word_list) == len(self.words_typed)
@@ -187,7 +186,9 @@ class Run:
                 word_amount=len(self.word_list),
                 expected_text=" ".join(self.word_list),
                 typed_text="".join([seg.text for seg in segments]),
-                accuracy=accuracy
+                accuracy=accuracy,
+                start_time=self.start_time_ns,
+                end_time=self.end_time_ns
             )
 
 

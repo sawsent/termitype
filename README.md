@@ -20,7 +20,7 @@ Termitype focuses on:
 ## Screenshots
 
 ### Typing screen  
-![typing screen](./media/typing-screen.png)
+![typing screen](./media/run-screen.png)
 
 ### Results screen
 ![results screen](./media/results-screen.png)

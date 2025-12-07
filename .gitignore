@@ -20,6 +20,8 @@ ENV/
 pip-wheel-metadata/
 pip-log.txt
 
+data/runs.json
+
 # Distribution / packaging
 build/
 develop-eggs/

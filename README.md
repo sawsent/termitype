@@ -107,6 +107,8 @@ python3 -m termitype
 ### Settings screen (with search)
 ![settings search](./media/settings-screen.png)
 
+### Profile dashboard
+![profile dashboard](./media/dashboard-screen.png)
 ---
 
 ## License

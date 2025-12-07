@@ -15,7 +15,6 @@ class SettingsScreen(Screen):
     def __init__(self, context: AppContext):
         self.context = context
         self.adapter: Adapter = context.adapter
-        self.restart()
 
     @property
     def descs(self) -> Dict:
@@ -74,7 +73,10 @@ class SettingsScreen(Screen):
             width=self.context.settings.width,
             height=self.context.settings.height,
             top_bar=TOP_BAR_MENU if self.context.settings.show_logo else Bar.EMPTY(),
-            bottom_bar=Bar.SINGLE(["[ESC] search", "[ENTER] select", "[k/j] up/down", "[TAB] run", "[q] quit"], style=LineStyle.ALIGNED_RIGHT(gap=5, padding_right=2)),
+            bottom_bar=Bar.MULTIPLE([
+                ["[ESC] search", "[ENTER] select", "[k] up", "[d] down"],
+                ["[p] profile", "[TAB] run", "[q] quit"]
+            ], style=LineStyle.ALIGNED_RIGHT(gap=4, padding_right=2)),
             show_outline=self.context.settings.display_outline
 
         )
@@ -154,6 +156,8 @@ class SettingsScreen(Screen):
                             self.setting_index = min(self.setting_index + 1, self.max_index)
                         case "k":
                             self.setting_index = max(self.setting_index - 1, 0)
+                        case "p":
+                            self.__next_screen = self.context.dashboard_screen.restart()
                 else:
                     self.searching_text += input_event.char
                     self.setting_index = self.get_first_setting_index_starting_with(self.searching_text)

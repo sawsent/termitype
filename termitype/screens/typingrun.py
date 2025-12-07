@@ -19,7 +19,6 @@ class TypingRunScreen(Screen):
         self.context = context
         self.adapter: Adapter = context.adapter
         self.engine = typing_engine
-        self.restart()
 
     @property
     def settings(self) -> Settings:

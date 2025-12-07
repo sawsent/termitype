@@ -185,7 +185,7 @@ class Run:
                 time_ns=time,
                 word_amount=len(self.word_list),
                 expected_text=" ".join(self.word_list),
-                typed_text="".join([seg.text for seg in segments]),
+                typed_text="".join([seg.text for seg in segments if seg.segment_type != SegmentType.MISSED]).strip(),
                 accuracy=accuracy,
                 start_time=self.start_time_ns,
                 end_time=self.end_time_ns

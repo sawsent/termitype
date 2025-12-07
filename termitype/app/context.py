@@ -12,6 +12,7 @@ class AppContext:
     storage_manager: StorageManager
     settings_screen: Screen
     run_screen: Screen
+    dashboard_screen: Screen
     language: List[str]
     runs: List[RunReport]
 
@@ -23,6 +24,11 @@ class AppContext:
 
     def save_runs(self) -> None:
         self.storage_manager.save_runs(self.runs)
+
+    def start_screens(self) -> None:
+        self.settings_screen.restart()
+        self.run_screen.restart()
+        self.dashboard_screen.restart()
 
 context = AppContext()
 

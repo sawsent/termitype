@@ -2,6 +2,7 @@ from termitype.app.app import App
 from termitype.adapters.macos import MacAdapter
 from termitype.cli.shutdown import shutdown
 from termitype.core.engine import TypingEngine
+from termitype.screens.dashboard import DashboardScreen
 from termitype.screens.typingrun import TypingRunScreen
 from termitype.screens.settings import SettingsScreen
 from termitype.app.context import context
@@ -20,11 +21,16 @@ def main():
     settings_screen = SettingsScreen(context)
     context.settings_screen = settings_screen
 
+    dashboard_screen = DashboardScreen(context)
+    context.dashboard_screen = dashboard_screen
+
     engine = TypingEngine(context)
     typing_run_screen = TypingRunScreen(context, engine)
     context.run_screen = typing_run_screen
 
     context.load_runs()
+
+    context.start_screens()
 
     app = App(adapter, typing_run_screen)
 

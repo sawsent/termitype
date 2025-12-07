@@ -46,11 +46,7 @@ Termitype works equally well on:
 - Linux (not implemented)
 - Windows Terminal / PowerShell (not implemented)
 
----
-
-## Roadmap
-
-### 🔜 Persistent run storage  
+### ✔ Persistent run storage  
 Store:
 - WPM  
 - accuracy  
@@ -58,15 +54,17 @@ Store:
 - detailed statistics  
 - settings used for the run  
 
-### 🔜 Stats dashboard  
+### ✔ Stats dashboard  
 A new analytics-driven screen:
-- WPM history  
+- WPM personal best
 - rolling averages  
-- mistake patterns  
-- accuracy trends  
 - lifetime totals  
 
-### 🔜 Additional color schemes  
+---
+
+## Roadmap
+
+### 🔜 Color schemes  
 Easy to change themes to customize the look.
 
 ---

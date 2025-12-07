@@ -6,8 +6,8 @@
     },
     "typing": {
         "language": "english",
-        "line_max_width": 75,
-        "word_count": 10
+        "line_max_width": 80,
+        "word_count": 30
     },
     "general": {
         "show_exit_message": true,

@@ -24,14 +24,24 @@ class DashboardScreen(Screen):
         self.total_runs = len(self.runs)
         self.valid_runs = [r for r in self.runs if r.accuracy > 85]
         self.valid_runs_amount = len(self.valid_runs)
-        self.most_recent_run = max(self.runs, key=lambda r: r.start_time)
+        if len(self.context.runs) == 0:
+            self.most_recent_run = None 
+        else:
+            self.most_recent_run = max(self.runs, key=lambda r: r.start_time)
+
         self.wpm_values = [r.wpm for r in self.valid_runs]
         self.acc_values = [r.accuracy for r in self.valid_runs]
 
-        self.personal_best_wpm = max(self.wpm_values)
-        self.average_wpm = sum(self.wpm_values) / len(self.wpm_values)
-        self.best_accuracy = max(self.acc_values)
-        self.average_accuracy = sum(self.acc_values) / len(self.acc_values)
+        if len(self.wpm_values) == 0:
+            self.personal_best_wpm = 0
+            self.average_wpm = 0
+            self.best_accuracy = 0
+            self.average_accuracy = 0
+        else:
+            self.personal_best_wpm = max(self.wpm_values)
+            self.average_wpm = sum(self.wpm_values) / len(self.wpm_values)
+            self.best_accuracy = max(self.acc_values)
+            self.average_accuracy = sum(self.acc_values) / len(self.acc_values)
 
         self.lines = [
             ["personal best", str(round(self.personal_best_wpm, 2))],

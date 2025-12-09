@@ -9,7 +9,7 @@ from termitype.app.context import context
 
 from termitype.storage.storagemanager import StorageManager
 
-def main():
+def bootstrap():
     adapter = MacAdapter()
     storage_manager = StorageManager()
     context.storage_manager = storage_manager

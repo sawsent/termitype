@@ -64,6 +64,9 @@ A new analytics-driven screen:
 
 ## Roadmap
 
+### 🔜 Windows and Linux adapters
+Right now only the Macos adapter is implemented, soon other adapters will be added.
+
 ### 🔜 Color schemes  
 Easy to change themes to customize the look.
 

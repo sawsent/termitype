@@ -7,16 +7,9 @@ from termitype.models.engine.runreport import RunReport
 from termitype.models.settings import Settings
 
 
-# --------------------------------------------------------
-# PATHS FOR USER-MODIFIED FILES
-# --------------------------------------------------------
-# ~/.config/termitype   (Linux)
-# ~/Library/Application Support/termitype (macOS)
-# %APPDATA%/termitype   (Windows)
 try:
     from platformdirs import user_config_dir
 except ImportError:
-    # Simple fallback (not ideal but works)
     def user_config_dir(appname): return Path.home() / f".{appname}"
 
 CONFIG_DIR = Path(user_config_dir("termitype"))
@@ -32,10 +25,6 @@ PKG_LANGUAGES = "termitype.static.languages"
 
 class StorageManager:
 
-    # ----------------------------------------------------
-    # SETTINGS
-    # ----------------------------------------------------
-
     def load_settings(self) -> Settings:
         """
         1. If user settings exist → load them.
@@ -43,17 +32,14 @@ class StorageManager:
         3. Save defaults to user config folder for future use.
         """
 
-        # Load user settings if present
         if SETTINGS_PATH.exists():
             with SETTINGS_PATH.open("r") as f:
                 data = json.load(f)
                 return self._parse_settings(data)
 
-        # Otherwise load packaged default
         with res.open_text(PKG_SETTINGS, "settings.json") as f:
             default_data = json.load(f)
 
-        # Save them to disk for the user
         with SETTINGS_PATH.open("w") as f:
             json.dump(default_data, f, indent=4)
 
@@ -94,9 +80,6 @@ class StorageManager:
         with SETTINGS_PATH.open("w") as f:
             json.dump(settings_json, f, indent=4)
 
-    # ----------------------------------------------------
-    # LANGUAGES
-    # ----------------------------------------------------
 
     def load_language(self, language: str) -> List[str]:
         """
@@ -108,9 +91,6 @@ class StorageManager:
 
         filename = f"{language}.json"
 
-        # -----------------------------------------
-        # 1. User override: ~/.config/termitype/languages/<lang>.json
-        # -----------------------------------------
         user_lang_dir = CONFIG_DIR / "languages"
         user_lang_path = user_lang_dir / filename
 
@@ -120,24 +100,14 @@ class StorageManager:
                     data = json.load(f)
                     return data.get("words", [])
             except Exception:
-                pass  # broken user file → fallback to default
+                pass
 
-        # -----------------------------------------
-        # 2. Packaged default language
-        # -----------------------------------------
         if res.is_resource(PKG_LANGUAGES, filename):
             with res.open_text(PKG_LANGUAGES, filename) as f:
                 data = json.load(f)
                 return data.get("words", [])
 
-        # -----------------------------------------
-        # 3. Nothing found
-        # -----------------------------------------
         return []
-
-    # ----------------------------------------------------
-    # RUN STORAGE
-    # ----------------------------------------------------
 
     def load_runs(self) -> List[RunReport]:
         """

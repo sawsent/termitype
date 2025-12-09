@@ -1,5 +1,4 @@
 from termitype.app.app import App
-from termitype.adapters.macos import MacAdapter
 from termitype.cli.shutdown import shutdown
 from termitype.core.engine import TypingEngine
 from termitype.screens.dashboard import DashboardScreen
@@ -9,8 +8,13 @@ from termitype.app.context import context
 
 from termitype.storage.storagemanager import StorageManager
 
+import sys
+import platform
+
 def bootstrap():
-    adapter = MacAdapter()
+
+    adapter = get_adapter()
+
     storage_manager = StorageManager()
     context.storage_manager = storage_manager
 
@@ -42,4 +46,18 @@ def bootstrap():
         context.save_settings()
 
     shutdown(context)
+
+def get_adapter():
+    system = platform.system()
+
+    match platform.system():
+        case "Darwin":
+            from termitype.adapters.macos import MacAdapter
+            return MacAdapter()
+        case "Linux":
+            sys.exit("Error: Linux adapter is not yet implemented. Termitype currently supports macOS only.")
+        case "Windows":
+            sys.exit("Error: Windows adapter is not yet implemented. Termitype currently supports macOS only.")
+        case _:
+            sys.exit(f"Error: Unsupported OS '{system}'. Termitype currently supports macOS only.")
 

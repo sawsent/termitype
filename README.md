@@ -57,8 +57,8 @@ Store:
 ### ✔ Stats dashboard  
 A new analytics-driven screen:
 - WPM personal best
-- rolling averages  
-- lifetime totals  
+- rolling averages
+- lifetime totals
 
 ---
 
@@ -81,32 +81,31 @@ Termitype is designed to be:
 ---
 
 ## Installation
-*SOON...*
 ```bash
 pip install termitype
 ```
 
-Or run it directly:
-
-```bash
-python3 -m termitype
-```
-
 ---
+
+## Usage
+Just run the termitype command to open the app!
+```bash
+termitype
+```
 
 ## Screenshots
 
 ### Typing screen  
-![typing screen](./media/run-screen.png)
+![typing screen](https://raw.githubusercontent.com/sawsent/termitype/main/media/run-screen.png)
 
 ### Results screen
-![results screen](./media/results-screen.png)
+![results screen](https://raw.githubusercontent.com/sawsent/termitype/main/media/results-screen.png)
 
 ### Settings screen (with search)
-![settings search](./media/settings-screen.png)
+![settings search](https://raw.githubusercontent.com/sawsent/termitype/main/media/settings-screen.png)
 
 ### Profile dashboard
-![profile dashboard](./media/dashboard-screen.png)
+![profile dashboard](https://raw.githubusercontent.com/sawsent/termitype/main/media/dashboard-screen.png)
 ---
 
 ## License

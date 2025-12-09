@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "termitype"
+version = "0.1.0"
+description = "A minimalist terminal typing speed test."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "Apache-2.0" }
+authors = [
+    { name = "sawsent" }
+]
+
+dependencies = [
+    "platformdirs>=3.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/sawsent/termitype"
+Source = "https://github.com/sawsent/termitype"
+
+[project.scripts]
+termitype = "termitype.cli.bootstrap:bootstrap"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+termitype = [
+    "static/*.json",
+    "static/languages/*.json",
+]
+

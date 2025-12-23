@@ -1,7 +1,6 @@
 from typing import Optional
 from termitype.screens.base import Screen
 from termitype.adapters.base import Adapter
-from termitype.storage.storagemanager import StorageManager
 
 
 class App:

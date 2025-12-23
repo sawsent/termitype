@@ -5,7 +5,8 @@ from termitype.models.presentation.cursor import Cursor
 from termitype.models.presentation.highlight import Highlight
 from math import floor, ceil
 
-from termitype.utils.color import Bg, Color, color, visible_len as v_len
+from termitype.utils.color import color, visible_len as v_len
+from termitype.models.color import Color, Bg
 
 def outline(lines: List[str]) -> List[str]:
     width = v_len(lines[0]) if lines else 0
@@ -194,6 +195,7 @@ class Presentation:
                  highlights: List[Highlight] = [],
                  cursor: Cursor = Cursor.HIDDEN(),
                  show_outline: bool = True,
+                 base_color: Color = Color.WHITE,
                  meta: Dict = {}) -> None:
         self.width = width
         self.height = height
@@ -203,6 +205,7 @@ class Presentation:
         self.bottom_bar: Bar = bottom_bar
         self.highlights: List[Highlight] = highlights
         self.show_outline: bool = show_outline
+        self.base_color: Color = base_color
         self.meta: Dict = meta
 
     def as_text(self) -> str:

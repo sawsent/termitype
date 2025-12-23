@@ -7,6 +7,9 @@ def shutdown(context: AppContext) -> None:
     if context.settings.show_exit_message:
         show_exit_message()
 
+    print("THEME")
+    print(context.theme)
+
 def show_exit_message() -> None:
     print()
     print(LOGO)

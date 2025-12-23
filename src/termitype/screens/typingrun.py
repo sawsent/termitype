@@ -8,7 +8,8 @@ from termitype.screens.base import Screen
 from termitype.adapters.base import Adapter
 from typing import Optional, override, List, Self
 
-from termitype.utils.color import Color, color, visible_len
+from termitype.utils.color import color
+from termitype.models.color import Color
 from termitype.utils.visuals import TOP_BAR_MENU
 from termitype.utils.words import chunk_words
 

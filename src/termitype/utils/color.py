@@ -1,56 +1,13 @@
-from enum import Enum
 import re
+from termitype.models.color import Color, Bg
 
 # Matches ANY ANSI SGR sequence (foreground, background, bold, etc.)
 _ANSI_RE = re.compile(r"\x1b\[[0-9;]*m")
 
-class Color(Enum):
-    RESET = 0
-
-    # Foreground colors
-    BLACK = 30
-    RED = 31
-    GREEN = 32
-    YELLOW = 33
-    BLUE = 34
-    MAGENTA = 35
-    CYAN = 36
-    WHITE = 37
-
-    # Bright foreground
-    BRIGHT_BLACK = 90
-    BRIGHT_RED = 91
-    BRIGHT_GREEN = 92
-    BRIGHT_YELLOW = 93
-    BRIGHT_BLUE = 94
-    BRIGHT_MAGENTA = 95
-    BRIGHT_CYAN = 96
-    BRIGHT_WHITE = 97
-
-class Bg(Enum):
-    BLACK = 40
-    RED = 41
-    GREEN = 42
-    YELLOW = 43
-    BLUE = 44
-    MAGENTA = 45
-    CYAN = 46
-    WHITE = 47
-
-    BRIGHT_BLACK = 100
-    BRIGHT_RED = 101
-    BRIGHT_GREEN = 102
-    BRIGHT_YELLOW = 103
-    BRIGHT_BLUE = 104
-    BRIGHT_MAGENTA = 105
-    BRIGHT_CYAN = 106
-    BRIGHT_WHITE = 107
-
-
-def color(text: str, fg: Color | None = None, bg: Bg | None = None) -> str:
+def color(text: str, fg: Color | None = None, bg: Bg | None = None, reset: str | None = None) -> str:
     """
     Apply foreground and/or background ANSI color codes.
-    Resets the style at the end.
+    Resets the style at the end to the configured theme base_color.
     """
     codes = []
 
@@ -60,10 +17,12 @@ def color(text: str, fg: Color | None = None, bg: Bg | None = None) -> str:
         codes.append(str(bg.value))
 
     if not codes:
-        return text  # no color applied
+        return text
+
+    r = reset or "0"
 
     start = f"\x1b[{';'.join(codes)}m"
-    end = "\x1b[0m"
+    end = f"\x1b[{r}m"
 
     return f"{start}{text}{end}"
 

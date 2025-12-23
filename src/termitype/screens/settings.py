@@ -5,7 +5,8 @@ from termitype.models.presentation.presentation import Bar, Line, LineStyle, Pre
 from termitype.models.settings import SettingType, Settings
 from termitype.screens.base import Screen
 from typing import Dict, List, Optional, override, Self
-from termitype.utils.color import Bg, Color, color
+from termitype.utils.color import color
+from termitype.models.color import Color, Bg
 
 from termitype.utils.visuals import TOP_BAR_MENU
 from termitype.utils.words import chunk_words, pad

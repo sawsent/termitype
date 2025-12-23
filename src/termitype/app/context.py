@@ -4,6 +4,7 @@ from termitype.models.engine.runreport import RunReport
 from termitype.models.settings import Settings
 from termitype.screens.base import Screen
 from termitype.storage.storagemanager import StorageManager
+from termitype.models.theme import Theme
 
 
 class AppContext:
@@ -15,6 +16,7 @@ class AppContext:
     dashboard_screen: Screen
     language: List[str]
     runs: List[RunReport]
+    theme: Theme
 
     def save_settings(self) -> None:
         self.storage_manager.save_settings(self.settings)

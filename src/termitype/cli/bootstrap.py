@@ -20,6 +20,7 @@ def bootstrap():
 
     context.settings = storage_manager.load_settings()
     context.language = storage_manager.load_language(context.settings.language)
+    context.theme = storage_manager.load_theme()
     context.adapter = adapter
 
     settings_screen = SettingsScreen(context)

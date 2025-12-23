@@ -5,6 +5,7 @@ import importlib.resources as res
 
 from termitype.models.engine.runreport import RunReport
 from termitype.models.settings import Settings
+from termitype.models.theme import Theme
 
 
 try:
@@ -16,6 +17,7 @@ CONFIG_DIR = Path(user_config_dir("termitype"))
 CONFIG_DIR.mkdir(parents=True, exist_ok=True)
 
 SETTINGS_PATH = CONFIG_DIR / "settings.json"
+THEME_PATH = CONFIG_DIR / "theme.json"
 RUNS_PATH = CONFIG_DIR / "runs.json"
 
 # Packaged static resources (read-only)
@@ -24,6 +26,14 @@ PKG_LANGUAGES = "termitype.static.languages"
 
 
 class StorageManager:
+    def load_theme(self) -> Theme:
+        if THEME_PATH.exists():
+            with THEME_PATH.open("r") as f:
+                data = json.load(f)
+                return Theme.from_dict(data)
+
+        return Theme.default()
+
 
     def load_settings(self) -> Settings:
         """

@@ -57,7 +57,8 @@ def get_adapter():
         case "Linux":
             sys.exit("Error: Linux adapter is not yet implemented. Termitype currently supports macOS only.")
         case "Windows":
-            sys.exit("Error: Windows adapter is not yet implemented. Termitype currently supports macOS only.")
+            from termitype.adapters.windows import WindowsAdapter
+            return WindowsAdapter()
         case _:
             sys.exit(f"Error: Unsupported OS '{system}'. Termitype currently supports macOS only.")
 
